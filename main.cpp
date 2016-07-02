@@ -116,18 +116,6 @@ int main(int ac, const char* av[]) {
         return xmrblocks.show_my_outputs(tx_hash, xmr_address, viewkey);
     });
 
-    CROW_ROUTE(app, "/search").methods("GET"_method)
-    ([&](const crow::request& req) {
-        return xmrblocks.search(string(req.url_params.get("value")));
-    });
-
-    CROW_ROUTE(app, "/autorefresh")
-    ([&]() {
-        uint64_t page_no {0};
-        bool refresh_page {true};
-        return xmrblocks.index2(page_no, refresh_page);
-    });
-
     // run the crow http server
     app.port(app_port).multithreaded().run();
 
