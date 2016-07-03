@@ -862,25 +862,52 @@ namespace xmreg {
             uint64_t out_idx = {0};
 
             mstch::map context {
-                {"xmr_address"          , xmr_address_str}
+                {"xmr_address"  , xmr_address_str},
+                {"viewkey"      , viewkey_str}
             };
 
             mstch::array outputs;
 
-            auto output_search = [&](crypto::public_key& out_pubkey,
-                                     xmreg::output_info& out_info) -> bool
+            uint64_t tx_blk_height {1051945};
+
+            xmreg::MyLMDB mylmdb {lmdb2_path};
+
+            for (uint64_t i = tx_blk_height; i <= tx_blk_height+1500; ++i)
             {
+                // get block at the given height i
+                block blk;
 
-                // public transaction key is combined with our viewkey
-                // to create, so called, derived key.
-                crypto::key_derivation derivation;
-
-                bool r = generate_key_derivation(out_info.tx_pub_key,
-                                                 prv_view_key,
-                                                 derivation);
-
-                if (r)
+                if (!mcore->get_block_by_height(i, blk))
                 {
+                    cerr << "Cant get block: " << i << endl;
+                    continue;
+                }
+
+                vector<output_info> outputs_info;
+
+                mylmdb.get_output_info(blk.timestamp, outputs_info);
+
+                cout << "blk: << " << i << " output no.: " << outputs_info.size() << endl;
+
+                // go through all outputs in each block, based on timestamp,
+                // and search for our outputs
+                for (const xmreg::output_info out_info : outputs_info)
+                {
+                    // public transaction key is combined with our viewkey
+                    // to create, so called, derived key.
+                    crypto::key_derivation derivation;
+
+                    bool r = generate_key_derivation(out_info.tx_pub_key,
+                                                     prv_view_key,
+                                                     derivation);
+
+                    if (!r)
+                    {
+                        cerr << "cant derive key for output: "
+                             << out_info.out_pub_key << endl;
+                        continue;
+                    }
+
                     // get the tx output public key
                     // that normally would be generated for us,
                     // if someone had sent us some xmr.
@@ -891,67 +918,23 @@ namespace xmreg {
                                       address.m_spend_public_key,
                                       generated_pubkey);
 
-                    // check if generated public key matches the current output's key
-                    bool mine_output = (out_pubkey == generated_pubkey);
-
-                    if (++out_idx % 1000 == 0)
+                    if (out_info.out_pub_key == generated_pubkey)
                     {
-                        cout << "Checkign outout: "<< out_idx << endl;
+                        outputs.push_back(mstch::map {
+                                {"out_pub_key"  , REMOVE_HASH_BRAKETS(fmt::format("{:s}", out_info.out_pub_key))},
+                                {"amount"       , fmt::format("{:0.12f}", XMR_AMOUNT(out_info.amount))},
+                                {"output_idx"   , fmt::format("{:04d}", ++out_idx)},
+                                {"tx_hash"      , REMOVE_HASH_BRAKETS(fmt::format("{:s}", out_info.tx_hash))}
+                        });
                     }
 
-                    if (mine_output)
-                    {
-                        cout << "Found mine output: " << out_pubkey << " \n"
-                             << "\t - deriviation : " << derivation << "\n"
-                             << "\t - tx_hash     : " << out_info.tx_hash << "\n"
-                             << "\t - tx_pub_key  : " << out_info.tx_pub_key << "\n"
-                             << "\t - amount      : " << XMR_AMOUNT(out_info.amount) << "\n"
-                             << "\t - index_in_tx : " << out_info.index_in_tx
-                             << endl;
-
-                        //  outputs.push_back(mstch::map {
-                        //      {"out_pub_key"   , REMOVE_HASH_BRAKETS(fmt::format("{:s}", out_info.tx_pub_key))},
-                        //      {"amount"        , fmt::format("{:0.12f}", XMR_AMOUNT(out_info.amount))},
-                        //      {"mine_output"   , mine_output},
-                        //      {"output_idx"    , fmt::format("{:02d}", output_idx++)}
-                        //  });
-                    }
                 }
-                else
-                {
-                    cerr << "Cant get dervied key for: "  << "\n"
-                         << "pub_tx_key: " << out_info.tx_pub_key << " and "
-                         << "prv_view_key" << prv_view_key << endl;
-                }
-
-                return true;
-            };
-
-
-            string blk_timestamp {"N/A"};
-
-            uint64_t tx_blk_height {1000000};
-
-            // get block cointaining this tx
-            block blk;
-
-            if (!mcore->get_block_by_height(tx_blk_height, blk))
-            {
-                cerr << "Cant get block: " << tx_blk_height << endl;
             }
-
-            string tx_blk_height_str {"N/A"};
-            blk_timestamp = xmreg::timestamp_to_str(blk.timestamp);
-
-            tx_blk_height_str = std::to_string(tx_blk_height);
-
-
-            uint64_t sum_xmr {0};
 
             //cout << "outputs.size(): " << outputs.size() << endl;
 
             context["outputs"] = outputs;
-            context["sum_xmr"] = XMR_AMOUNT(sum_xmr);
+            context["sum_xmr"] = XMR_AMOUNT(0);
 
             // read my_outputs.html
             string my_outputs_html = xmreg::read(TMPL_MY_OUTPUTS);

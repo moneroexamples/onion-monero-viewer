@@ -34,14 +34,14 @@
         <table class="center" >
             <tr>
                 <td>Outputs public keys</td>
+                <td>tx hash</td>
                 <td>amount</td>
-                <td>output match?</td>
             </tr>
             {{#outputs}}
             <tr>
                 <td>{{output_idx}}: {{out_pub_key}}</td>
+                <td>{{tx_hash}}</td>
                 <td>{{amount}}</td>
-                <td>{{mine_output}}</td>
             </tr>
             {{/outputs}}
         </table>
