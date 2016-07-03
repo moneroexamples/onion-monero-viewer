@@ -890,6 +890,8 @@ namespace xmreg {
 
                 //cout << "blk: << " << i << " output no.: " << outputs_info.size() << endl;
 
+                crypto::hash previous_tx_hash {null_hash};
+
                 // go through all outputs in each block, based on timestamp,
                 // and search for our outputs
                 for (const xmreg::output_info out_info : outputs_info)
@@ -919,6 +921,8 @@ namespace xmreg {
                                       address.m_spend_public_key,
                                       generated_pubkey);
 
+                    bool same_tx {false};
+
                     if (out_info.out_pub_key == generated_pubkey)
                     {
 
@@ -926,13 +930,26 @@ namespace xmreg {
 
                         string timestamp_str = xmreg::timestamp_to_str(blk.timestamp);
 
+
+                        same_tx = (previous_tx_hash == out_info.tx_hash);
+
+                        string out_pub_key_str = REMOVE_HASH_BRAKETS(fmt::format("{:s}",
+                                                                     out_info.out_pub_key));
+
+                       string tx_hash_str      = REMOVE_HASH_BRAKETS(fmt::format("{:s}",
+                                                                     out_info.tx_hash));
+
                         outputs.push_back(mstch::map {
-                                {"out_pub_key"  , REMOVE_HASH_BRAKETS(fmt::format("{:s}", out_info.out_pub_key))},
+                                {"out_pub_key"  , out_pub_key_str},
                                 {"amount"       , fmt::format("{:0.12f}", XMR_AMOUNT(out_info.amount))},
                                 {"output_idx"   , fmt::format("{:04d}", ++out_idx)},
-                                {"tx_hash"      , REMOVE_HASH_BRAKETS(fmt::format("{:s}", out_info.tx_hash))},
-                                {"blk_timestamp", timestamp_str}
+                                {"tx_hash"      , tx_hash_str},
+                                {"blk_timestamp", timestamp_str},
+                                {"same_tx", !same_tx}
                         });
+
+                        previous_tx_hash = out_info.tx_hash;
+
                     }
                 } // for (const xmreg::output_info out_info : outputs_info)
             } // for (uint64_t i = tx_blk_height;
