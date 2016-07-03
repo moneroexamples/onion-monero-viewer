@@ -868,11 +868,12 @@ namespace xmreg {
 
             mstch::array outputs;
 
-            uint64_t tx_blk_height {1051945};
+            uint64_t tx_blk_height {834014};
+            uint64_t sum_xmr {0};
 
             xmreg::MyLMDB mylmdb {lmdb2_path};
 
-            for (uint64_t i = tx_blk_height; i <= tx_blk_height+1500; ++i)
+            for (uint64_t i = tx_blk_height; i <= tx_blk_height+500; ++i)
             {
                 // get block at the given height i
                 block blk;
@@ -887,7 +888,7 @@ namespace xmreg {
 
                 mylmdb.get_output_info(blk.timestamp, outputs_info);
 
-                cout << "blk: << " << i << " output no.: " << outputs_info.size() << endl;
+                //cout << "blk: << " << i << " output no.: " << outputs_info.size() << endl;
 
                 // go through all outputs in each block, based on timestamp,
                 // and search for our outputs
@@ -920,21 +921,25 @@ namespace xmreg {
 
                     if (out_info.out_pub_key == generated_pubkey)
                     {
+
+                        sum_xmr += out_info.amount;
+
+                        string timestamp_str = xmreg::timestamp_to_str(blk.timestamp);
+
                         outputs.push_back(mstch::map {
                                 {"out_pub_key"  , REMOVE_HASH_BRAKETS(fmt::format("{:s}", out_info.out_pub_key))},
                                 {"amount"       , fmt::format("{:0.12f}", XMR_AMOUNT(out_info.amount))},
                                 {"output_idx"   , fmt::format("{:04d}", ++out_idx)},
-                                {"tx_hash"      , REMOVE_HASH_BRAKETS(fmt::format("{:s}", out_info.tx_hash))}
+                                {"tx_hash"      , REMOVE_HASH_BRAKETS(fmt::format("{:s}", out_info.tx_hash))},
+                                {"blk_timestamp", timestamp_str}
                         });
                     }
+                } // for (const xmreg::output_info out_info : outputs_info)
+            } // for (uint64_t i = tx_blk_height;
 
-                }
-            }
-
-            //cout << "outputs.size(): " << outputs.size() << endl;
-
-            context["outputs"] = outputs;
-            context["sum_xmr"] = XMR_AMOUNT(0);
+            context["outputs_no"] = outputs.size();
+            context["outputs"]    = outputs;
+            context["sum_xmr"]    = fmt::format("{:0.12f}", XMR_AMOUNT(sum_xmr));
 
             // read my_outputs.html
             string my_outputs_html = xmreg::read(TMPL_MY_OUTPUTS);

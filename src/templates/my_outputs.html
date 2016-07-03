@@ -1,30 +1,5 @@
 
 <div>
-
-    <H4 style="margin:5px">Tx hash: {{tx_hash}}</H4>
-    <H5 style="margin:5px">Tx public key: {{tx_pub_key}}</H5>
-
-
-    {{#has_payment_id}}
-    <H5 style="margin:5px">Payment id: {{payment_id}}</H5>
-    {{/has_payment_id}}
-
-    {{#has_payment_id8}}
-    <H5 style="margin:5px">Payment id (encrypted): {{payment_id8}}</H5>
-    {{/has_payment_id8}}
-
-
-    <table class="center" style="width: 80%; margin-top:10px">
-        <tr>
-            <td>Block: {{blk_height}}</td>
-            <td>Timestamp [UCT]: {{blk_timestamp}}</td>
-            <td>Age [y:d:h:m:s]: {{delta_time}}</td>
-            <td>Fee: {{tx_fee}}</td>
-            <td>Tx size: {{tx_size}} kB</td>
-        </tr>
-
-    </table>
-
     <h3>Checking which outputs belong to the given address and viewkey</h3>
     <h5>address: {{xmr_address}}</h5>
     <h5>viewkey: {{viewkey}}</h5>
@@ -35,18 +10,21 @@
             <tr>
                 <td>Outputs public keys</td>
                 <td>tx hash</td>
+                <td>timestamp</td>
                 <td>amount</td>
             </tr>
             {{#outputs}}
             <tr>
                 <td>{{output_idx}}: {{out_pub_key}}</td>
-                <td>{{tx_hash}}</td>
+                <td><a href="http://xmrblocksvckbwvx.onion/tx/{{tx_hash}}">{{tx_hash}}</a></td>
+                <td>{{blk_timestamp}}</td>
                 <td>{{amount}}</td>
             </tr>
             {{/outputs}}
         </table>
 
         <h3>Sum XMR from matched outputs: {{sum_xmr}}</h3>
+
     </div>
 
 
