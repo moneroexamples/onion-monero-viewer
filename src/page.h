@@ -826,7 +826,6 @@ namespace xmreg {
         string
         show_my_outputs(string xmr_address_str, string viewkey_str)
         {
-
             // remove white characters
             boost::trim(xmr_address_str);
             boost::trim(viewkey_str);
@@ -858,6 +857,10 @@ namespace xmreg {
                 cerr << "Cant parse view key: " << viewkey_str << endl;
                 return string("Cant parse view key: " + viewkey_str);
             }
+
+            // get the current blockchain height.
+            uint64_t height =
+                    xmreg::MyLMDB::get_blockchain_height(mcore->get_blkchain_path()) - 1;
 
             uint64_t out_idx = {0};
 
