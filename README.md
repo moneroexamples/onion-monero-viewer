@@ -62,11 +62,9 @@ as shown here:
 
 ```
 
-
-
 ## Example screenshot
 
-![Onion Monero Blockchain Explorer](https://raw.githubusercontent.com/moneroexamples/onion-monero-blockchain-explorer/master/screenshot/screenshot.jpg)
+![Onion Monero Blockchain Explorer](https://raw.githubusercontent.com/moneroexamples/onion-monero-viewer/master/screenshot/screenshot.jpg)
 
 
 ## Compile and run the explorer
@@ -108,7 +106,7 @@ as follows:
 
 ```bash
 # download the source code
-git clone https://github.com/moneroexamples/onion-monero-blockchain-explorer.git
+git clone https://github.com/moneroexamples/onion-monero-viewer.git
 
 # enter the downloaded sourced code folder
 cd onion-monero-viewer
@@ -120,7 +118,7 @@ cmake .
 make
 ```
 
-When compilation finishes executable `xmrblocks` should be created.
+When compilation finishes executable `xmrviewer` should be created.
 
 To run it:
 ```
