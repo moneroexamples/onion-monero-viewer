@@ -871,12 +871,12 @@ namespace xmreg {
 
             mstch::array outputs;
 
-            uint64_t tx_blk_height {834014};
+            uint64_t tx_blk_height {height-100000};
             uint64_t sum_xmr {0};
 
             xmreg::MyLMDB mylmdb {lmdb2_path};
 
-            for (uint64_t i = tx_blk_height; i <= tx_blk_height+500; ++i)
+            for (uint64_t i = tx_blk_height; i <= height; ++i)
             {
                 // get block at the given height i
                 block blk;
