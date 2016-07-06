@@ -64,7 +64,7 @@ as shown here:
 
 ## Example screenshot
 
-![Onion Monero Blockchain Explorer](https://raw.githubusercontent.com/moneroexamples/onion-monero-viewer/master/screenshot/screenshot.jpg)
+![Onion Monero Viewer](https://raw.githubusercontent.com/moneroexamples/onion-monero-viewer/master/screenshot/screenshot2.jpg)
 
 
 ## Compile and run the explorer
