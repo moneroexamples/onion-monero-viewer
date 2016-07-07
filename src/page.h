@@ -824,8 +824,13 @@ namespace xmreg {
         }
 
         string
-        show_my_outputs(string xmr_address_str, string viewkey_str)
+        show_my_outputs(string xmr_address_str,
+                        string viewkey_str,
+                        uint64_t since_when = 1)
         {
+
+            const set<uint64_t> possible_since_when_values {1, 7, 14, 28};
+
             // remove white characters
             boost::trim(xmr_address_str);
             boost::trim(viewkey_str);
@@ -839,6 +844,17 @@ namespace xmreg {
             {
                 return string("Viewkey not provided!");
             }
+
+            // check if since_when is correct value
+            if (!possible_since_when_values.count(since_when))
+            {
+                string err_msg = fmt::format(
+                        "Since when value {:d} is incorrect", since_when);
+                cerr << err_msg << endl;
+                return string(err_msg);
+            }
+
+            // cout << "since when: " << since_when << endl;
 
             // parse string representing given monero address
             cryptonote::account_public_address address;
@@ -860,7 +876,8 @@ namespace xmreg {
 
             // get the current blockchain height.
             uint64_t height =
-                    xmreg::MyLMDB::get_blockchain_height(mcore->get_blkchain_path()) - 1;
+                    xmreg::MyLMDB::get_blockchain_height(
+                            mcore->get_blkchain_path()) - 1;
 
             uint64_t out_idx = {0};
 
@@ -939,7 +956,7 @@ namespace xmreg {
                         string out_pub_key_str = REMOVE_HASH_BRAKETS(fmt::format("{:s}",
                                                                      out_info.out_pub_key));
 
-                       string tx_hash_str      = REMOVE_HASH_BRAKETS(fmt::format("{:s}",
+                        string tx_hash_str      = REMOVE_HASH_BRAKETS(fmt::format("{:s}",
                                                                      out_info.tx_hash));
 
                         outputs.push_back(mstch::map {
@@ -948,7 +965,7 @@ namespace xmreg {
                                 {"output_idx"   , fmt::format("{:04d}", ++out_idx)},
                                 {"tx_hash"      , tx_hash_str},
                                 {"blk_timestamp", timestamp_str},
-                                {"same_tx", !same_tx}
+                                {"same_tx"      , !same_tx}
                         });
 
                         previous_tx_hash = out_info.tx_hash;

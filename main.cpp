@@ -109,10 +109,12 @@ int main(int ac, const char* av[]) {
     CROW_ROUTE(app, "/myoutputs").methods("GET"_method)
     ([&](const crow::request& req) {
 
-        string xmr_address = string(req.url_params.get("xmr_address"));
-        string viewkey     = string(req.url_params.get("viewkey"));
+        string xmr_address  = string(req.url_params.get("xmr_address"));
+        string viewkey      = string(req.url_params.get("viewkey"));
+        uint64_t since_when = boost::lexical_cast<uint64_t>(
+                                   req.url_params.get("sincewhen"));
 
-        return xmrblocks.show_my_outputs(xmr_address, viewkey);
+        return xmrblocks.show_my_outputs(xmr_address, viewkey, since_when);
     });
 
     // run the crow http server

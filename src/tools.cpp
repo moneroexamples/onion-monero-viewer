@@ -511,7 +511,7 @@ namespace xmreg
     estimate_bc_height(const string& date, const char* format)
     {
         const pt::ptime MONERO_START {gt::date(2014,04,18)};
-        const uint64_t MONERO_BLOCK_TIME {60}; // seconds
+        const uint64_t MONERO_BLOCK_TIME {120}; // seconds
 
         dateparser parser {format};
 
