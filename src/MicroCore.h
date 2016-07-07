@@ -46,6 +46,12 @@ namespace xmreg
         get_block_by_height(const uint64_t& height, block& blk);
 
         bool
+        get_block_by_date(const string& date, /* searched date */
+                          block& blk, /* block to be returned */
+                          uint64_t init_height = 0, /* start looking from this height */
+                          const char* format = "%Y-%m-%d");
+
+        bool
         get_tx(const crypto::hash& tx_hash, transaction& tx);
 
         bool

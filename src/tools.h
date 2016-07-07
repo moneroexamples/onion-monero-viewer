@@ -213,7 +213,8 @@ namespace xmreg
                       uint64_t timeN, uint64_t resolution = 80,
                       uint64_t time0 = 1397818193 /* timestamp of the second block */);
 
-
+    time_t
+    to_time_t(pt::ptime t);
 }
 
 #endif //XMREG01_TOOLS_H

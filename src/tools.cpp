@@ -614,7 +614,13 @@ namespace xmreg
         return make_pair(empty_time, scale);
     }
 
-
-
+    time_t
+    to_time_t(pt::ptime t)
+    {
+        using namespace boost::posix_time;
+        ptime epoch(boost::gregorian::date(1970,1,1));
+        time_duration::sec_type x = (t - epoch).total_seconds();
+        return time_t(x);
+    }
 
 }
