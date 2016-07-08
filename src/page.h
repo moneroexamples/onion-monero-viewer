@@ -251,7 +251,6 @@ namespace xmreg {
 
             // render the page
             return mstch::render(full_page, context);
-
         }
 
 
@@ -854,7 +853,10 @@ namespace xmreg {
                 return string(err_msg);
             }
 
-            // cout << "since when: " << since_when << endl;
+            // rough estimate of number of recent blocks to search
+            // from the current block. Monero blocks now are, on average,
+            // every 120 seconds, so we use this to get the estimate
+            uint64_t no_of_blocks_to_search = since_when*24*3600 / 120;
 
             // parse string representing given monero address
             cryptonote::account_public_address address;
@@ -888,7 +890,7 @@ namespace xmreg {
 
             mstch::array outputs;
 
-            uint64_t tx_blk_height {height-100000};
+            uint64_t tx_blk_height {height - no_of_blocks_to_search};
             uint64_t sum_xmr {0};
 
             xmreg::MyLMDB mylmdb {lmdb2_path};
