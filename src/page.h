@@ -309,9 +309,9 @@ namespace xmreg {
                 this->block_id = i;
                 this->timestamp_str = xmreg::timestamp_to_str(blk.timestamp);
 
-                //cout << "blk: << " << i << " output no.: " << outputs_info.size() << endl;
+                cout << "blk: << " << i << " output no.: " << outputs_info.size() << endl;
 
-                std::this_thread::sleep_for(std::chrono::seconds(1));
+                //std::this_thread::sleep_for(std::chrono::seconds(1));
 
                 crypto::hash previous_tx_hash {null_hash};
 
