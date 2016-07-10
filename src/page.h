@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <limits>
 #include <ctime>
+#include <thread>
 
 #define TMPL_DIR             "./templates"
 #define TMPL_PARIALS_DIR     TMPL_DIR "/partials"
@@ -823,6 +824,13 @@ namespace xmreg {
         }
 
         string
+        from_thread()
+        {
+            cout << "inside thread" << endl;
+            return "dffff";
+        }
+
+        string
         show_my_outputs(string xmr_address_str,
                         string viewkey_str,
                         uint64_t since_when = 1)
@@ -892,6 +900,10 @@ namespace xmreg {
 
             uint64_t tx_blk_height {height - no_of_blocks_to_search};
             uint64_t sum_xmr {0};
+
+            std::thread t1(&page::from_thread, this);
+            t1.detach();
+
 
             xmreg::MyLMDB mylmdb {lmdb2_path};
 

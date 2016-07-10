@@ -38,3 +38,19 @@
 
 
 </div>
+
+<script>
+    $(document).ready(function() {
+        setInterval("ajaxd()", 1000);
+    });
+
+    function ajaxd() {
+        $.ajax({
+            type: "GET",
+            url: "/ajax_test",
+            success: function(msg){
+                console.log(msg)
+            }
+        });
+    }
+</script>

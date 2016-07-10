@@ -105,6 +105,11 @@ int main(int ac, const char* av[]) {
         return xmrblocks.index2();
     });
 
+    CROW_ROUTE(app, "/ajax_test")
+    ([&]() {
+        return "ajax rets";
+    });
+
 
     CROW_ROUTE(app, "/myoutputs").methods("GET"_method)
     ([&](const crow::request& req) {
