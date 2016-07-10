@@ -67,7 +67,7 @@ as shown here:
 ![Onion Monero Viewer](https://raw.githubusercontent.com/moneroexamples/onion-monero-viewer/master/screenshot/screenshot2.jpg)
 
 
-## Compile and run the explorer
+## Compile and run the viewer
 
 ##### Monero headers and libraries setup
 
