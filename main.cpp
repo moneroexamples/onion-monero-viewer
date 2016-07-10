@@ -8,7 +8,14 @@
 
 #include <fstream>
 
+#include <boost/uuid/uuid.hpp>            // uuid class
+#include <boost/uuid/uuid_generators.hpp> // generators
+#include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
+
 using boost::filesystem::path;
+
+
+
 
 using namespace std;
 
@@ -105,9 +112,16 @@ int main(int ac, const char* av[]) {
         return xmrblocks.index2();
     });
 
-    CROW_ROUTE(app, "/ajax_test")
-    ([&]() {
-        return "ajax rets";
+    CROW_ROUTE(app, "/finish_search").methods("GET"_method)
+    ([&](const crow::request& req) {
+        string uuid  = string(req.url_params.get("uuid"));
+        return xmrblocks.fire_finish_search(uuid);
+    });
+
+    CROW_ROUTE(app, "/ajax_test").methods("GET"_method)
+    ([&](const crow::request& req) {
+        string uuid  = string(req.url_params.get("uuid"));
+        return xmrblocks.get_search_status(uuid);
     });
 
 
@@ -119,7 +133,27 @@ int main(int ac, const char* av[]) {
         uint64_t since_when = boost::lexical_cast<uint64_t>(
                                    req.url_params.get("sincewhen"));
 
-        return xmrblocks.show_my_outputs(xmr_address, viewkey, since_when);
+
+        boost::uuids::uuid uuid = boost::uuids::random_generator()();
+        string uuid_str = boost::lexical_cast<string>(uuid);
+        std::cout << uuid_str << std::endl;
+
+
+        // get the current blockchain height.
+        uint64_t height =
+                xmreg::MyLMDB::get_blockchain_height(
+                        mcore.get_blkchain_path()) - 1;
+
+        shared_ptr<xmreg::search_class_test> search_cls
+                = shared_ptr<xmreg::search_class_test>(
+                        new xmreg::search_class_test(&mcore, core_storage,
+                                                     xmr_address, viewkey,
+                                                     since_when, height)
+                );
+
+        xmrblocks.add_searching_thread(uuid_str, search_cls);
+
+        return xmrblocks.show_my_outputs(xmr_address, viewkey, uuid_str, since_when);
     });
 
     // run the crow http server

@@ -4,6 +4,9 @@
     <h5>address: {{xmr_address}}</h5>
     <h5>viewkey: {{viewkey}}</h5>
 
+
+    <div id="status"></div>
+
     <h3>Outputs ({{outputs_no}})</h3>
     <div class="center">
         <table class="center" >
@@ -48,9 +51,19 @@
         $.ajax({
             type: "GET",
             url: "/ajax_test",
+            data: "uuid={{uuid}}",
             success: function(msg){
-                console.log(msg)
+                $("#status").html(msg);
             }
         });
     }
+
+    $(window).on("beforeunload", function() {
+        $.ajax({
+            type: "GET",
+            data: "uuid={{uuid}}",
+            url: "/finish_search"
+        });
+    })
+
 </script>

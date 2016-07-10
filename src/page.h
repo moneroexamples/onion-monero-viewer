@@ -57,7 +57,6 @@ namespace xmreg {
     // tx_blob does not exist
     DEFINE_MEMBER_GETTER(tx_blob, string)
 
-
     /**
      * @brief The tx_details struct
      *
@@ -188,6 +187,197 @@ namespace xmreg {
         }
     };
 
+
+    struct search_class_test
+    {
+
+        MicroCore* mcore;
+        Blockchain* core_storage;
+
+        string xmr_address_str ;
+        string viewkey_str;
+        uint64_t since_when;
+
+        uint64_t current_blockchain_height;
+
+        uint64_t block_id;
+
+        bool user_left;
+
+        cryptonote::account_public_address address;
+        crypto::secret_key prv_view_key;
+
+        search_class_test(MicroCore* _mcore,
+                          Blockchain* _core_storage,
+                          string _xmr_address,
+                          string _viewkey,
+                          uint64_t _since_when,
+                          uint64_t _height
+        )
+                :
+                  mcore {_mcore},
+                  core_storage {_core_storage},
+                  xmr_address_str {_xmr_address},
+                  viewkey_str {_viewkey},
+                  since_when {_since_when},
+                  current_blockchain_height {_height},
+                  block_id{0},
+                  user_left{false}
+        {
+            const set<uint64_t> possible_since_when_values {1, 7, 14, 28};
+
+            // remove white characters
+            boost::trim(xmr_address_str);
+            boost::trim(viewkey_str);
+
+            if (xmr_address_str.empty())
+            {
+                return;
+            }
+
+            if (viewkey_str.empty())
+            {
+                return;
+            }
+
+            // check if since_when is correct value
+            if (!possible_since_when_values.count(since_when))
+            {
+                string err_msg = fmt::format(
+                        "Since when value {:d} is incorrect", since_when);
+                cerr << err_msg << endl;
+                return;
+            }
+
+            // parse string representing given monero address
+            if (!xmreg::parse_str_address(xmr_address_str,  address, 0))
+            {
+                cerr << "Cant parse string address: " << xmr_address_str << endl;
+                return;
+            }
+
+            // parse string representing given private viewkey
+
+
+            if (!xmreg::parse_str_secret_key(viewkey_str, prv_view_key))
+            {
+                cerr << "Cant parse view key: " << viewkey_str << endl;
+                return;
+            }
+
+        };
+
+        void
+        search()
+        {
+
+            // rough estimate of number of recent blocks to search
+            // from the current block. Monero blocks now are, on average,
+            // every 120 seconds, so we use this to get the estimate
+            uint64_t no_of_blocks_to_search = since_when*24*3600 / 120;
+
+            uint64_t tx_blk_height {current_blockchain_height - no_of_blocks_to_search};
+            uint64_t sum_xmr {0};
+
+            cout << "prv_view_key: " << prv_view_key << endl;
+
+            xmreg::MyLMDB mylmdb {"/home/mwo/.bitmonero/lmdb2"};
+
+
+
+            for (uint64_t i = tx_blk_height; i <= current_blockchain_height; ++i)
+            {
+                // get block at the given height i
+                block blk;
+
+                if (!mcore->get_block_by_height(i, blk))
+                {
+                    cerr << "Cant get block: " << i << endl;
+                    continue;
+                }
+
+                vector<output_info> outputs_info;
+
+                mylmdb.get_output_info(blk.timestamp, outputs_info);
+
+
+
+                this->block_id = i;
+
+                //cout << "blk: << " << i << " output no.: " << outputs_info.size() << endl;
+
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+
+                crypto::hash previous_tx_hash {null_hash};
+
+                // go through all outputs in each block, based on timestamp,
+                // and search for our outputs
+                for (const xmreg::output_info out_info : outputs_info)
+                {
+                    // public transaction key is combined with our viewkey
+                    // to create, so called, derived key.
+                    crypto::key_derivation derivation;
+
+                    cout << "prv_view_key: " << prv_view_key << endl;
+
+                    bool r = generate_key_derivation(out_info.tx_pub_key,
+                                                     prv_view_key,
+                                                     derivation);
+
+                    if (!r)
+                    {
+                        cerr << "cant derive key for output: "
+                             << out_info.out_pub_key << endl;
+                        continue;
+                    }
+
+                    // get the tx output public key
+                    // that normally would be generated for us,
+                    // if someone had sent us some xmr.
+                    crypto::public_key generated_pubkey;
+
+                    derive_public_key(derivation,
+                                      out_info.index_in_tx,
+                                      address.m_spend_public_key,
+                                      generated_pubkey);
+
+                    bool same_tx {false};
+
+                    if (out_info.out_pub_key == generated_pubkey)
+                    {
+
+                        sum_xmr += out_info.amount;
+
+                        string timestamp_str = xmreg::timestamp_to_str(blk.timestamp);
+
+
+                        same_tx = (previous_tx_hash == out_info.tx_hash);
+
+                        string out_pub_key_str = REMOVE_HASH_BRAKETS(fmt::format("{:s}",
+                                                                     out_info.out_pub_key));
+
+                        string tx_hash_str      = REMOVE_HASH_BRAKETS(fmt::format("{:s}",
+                                                                      out_info.tx_hash));
+
+//                        outputs.push_back(mstch::map {
+//                                {"out_pub_key"  , out_pub_key_str},
+//                                {"amount"       , fmt::format("{:0.12f}", XMR_AMOUNT(out_info.amount))},
+//                                {"output_idx"   , fmt::format("{:04d}", ++out_idx)},
+//                                {"tx_hash"      , tx_hash_str},
+//                                {"blk_timestamp", timestamp_str},
+//                                {"same_tx"      , !same_tx}
+//                        });
+
+                        previous_tx_hash = out_info.tx_hash;
+
+                    }
+                } // for (const xmreg::output_info out_info : outputs_info)
+            } // for (uint64_t i = tx_blk_height;
+        }
+
+    };
+
+
     class page {
 
         // check if we have tx_blob member in tx_info structure
@@ -205,6 +395,9 @@ namespace xmreg {
         string lmdb2_path;
 
 
+        map<string, shared_ptr<xmreg::search_class_test>> searching_threads;
+
+
     public:
 
         page(MicroCore* _mcore, Blockchain* _core_storage,
@@ -218,7 +411,10 @@ namespace xmreg {
 
         }
 
-
+        void add_searching_thread(string uuid, shared_ptr<xmreg::search_class_test>& search_cls)
+        {
+            searching_threads[uuid] = search_cls;
+        }
 
         /**
          * @brief show recent transactions and mempool
@@ -823,16 +1019,28 @@ namespace xmreg {
             return mstch::render(full_page, context);
         }
 
+
         string
-        from_thread()
+        get_search_status(string uuid)
         {
-            cout << "inside thread" << endl;
-            return "dffff";
-        }
+            uint64_t block_id = searching_threads[uuid]->block_id;
+            string viewkey_str  = searching_threads[uuid]->viewkey_str;
+            cout << uuid << ": " << searching_threads[uuid]->block_id << "viewkey " << viewkey_str << endl;
+            return std::to_string(block_id);
+        };
+
+        string
+        fire_finish_search( string uuid)
+        {
+            cout <<  "User left" << endl;
+            return {};
+        };
+
 
         string
         show_my_outputs(string xmr_address_str,
                         string viewkey_str,
+                        string uuid,
                         uint64_t since_when = 1)
         {
 
@@ -893,7 +1101,8 @@ namespace xmreg {
 
             mstch::map context {
                 {"xmr_address"  , xmr_address_str},
-                {"viewkey"      , viewkey_str}
+                {"viewkey"      , viewkey_str},
+                {"uuid"         , uuid}
             };
 
             mstch::array outputs;
@@ -901,96 +1110,97 @@ namespace xmreg {
             uint64_t tx_blk_height {height - no_of_blocks_to_search};
             uint64_t sum_xmr {0};
 
-            std::thread t1(&page::from_thread, this);
+            //std::thread t1 {*searching_threads[uuid]};
+            std::thread t1 {&search_class_test::search, searching_threads[uuid].get()};
             t1.detach();
 
 
-            xmreg::MyLMDB mylmdb {lmdb2_path};
+            // xmreg::MyLMDB mylmdb {lmdb2_path};
 
-            for (uint64_t i = tx_blk_height; i <= height; ++i)
-            {
-                // get block at the given height i
-                block blk;
+            // for (uint64_t i = tx_blk_height; i <= height; ++i)
+            // {
+            //     // get block at the given height i
+            //     block blk;
 
-                if (!mcore->get_block_by_height(i, blk))
-                {
-                    cerr << "Cant get block: " << i << endl;
-                    continue;
-                }
+            //     if (!mcore->get_block_by_height(i, blk))
+            //     {
+            //         cerr << "Cant get block: " << i << endl;
+            //         continue;
+            //     }
 
-                vector<output_info> outputs_info;
+            //     vector<output_info> outputs_info;
 
-                mylmdb.get_output_info(blk.timestamp, outputs_info);
+            //     mylmdb.get_output_info(blk.timestamp, outputs_info);
 
-                //cout << "blk: << " << i << " output no.: " << outputs_info.size() << endl;
+            //     //cout << "blk: << " << i << " output no.: " << outputs_info.size() << endl;
 
-                crypto::hash previous_tx_hash {null_hash};
+            //     crypto::hash previous_tx_hash {null_hash};
 
-                // go through all outputs in each block, based on timestamp,
-                // and search for our outputs
-                for (const xmreg::output_info out_info : outputs_info)
-                {
-                    // public transaction key is combined with our viewkey
-                    // to create, so called, derived key.
-                    crypto::key_derivation derivation;
+            //     // go through all outputs in each block, based on timestamp,
+            //     // and search for our outputs
+            //     for (const xmreg::output_info out_info : outputs_info)
+            //     {
+            //         // public transaction key is combined with our viewkey
+            //         // to create, so called, derived key.
+            //         crypto::key_derivation derivation;
 
-                    bool r = generate_key_derivation(out_info.tx_pub_key,
-                                                     prv_view_key,
-                                                     derivation);
+            //         bool r = generate_key_derivation(out_info.tx_pub_key,
+            //                                          prv_view_key,
+            //                                          derivation);
 
-                    if (!r)
-                    {
-                        cerr << "cant derive key for output: "
-                             << out_info.out_pub_key << endl;
-                        continue;
-                    }
+            //         if (!r)
+            //         {
+            //             cerr << "cant derive key for output: "
+            //                  << out_info.out_pub_key << endl;
+            //             continue;
+            //         }
 
-                    // get the tx output public key
-                    // that normally would be generated for us,
-                    // if someone had sent us some xmr.
-                    crypto::public_key generated_pubkey;
+            //         // get the tx output public key
+            //         // that normally would be generated for us,
+            //         // if someone had sent us some xmr.
+            //         crypto::public_key generated_pubkey;
 
-                    derive_public_key(derivation,
-                                      out_info.index_in_tx,
-                                      address.m_spend_public_key,
-                                      generated_pubkey);
+            //         derive_public_key(derivation,
+            //                           out_info.index_in_tx,
+            //                           address.m_spend_public_key,
+            //                           generated_pubkey);
 
-                    bool same_tx {false};
+            //         bool same_tx {false};
 
-                    if (out_info.out_pub_key == generated_pubkey)
-                    {
+            //         if (out_info.out_pub_key == generated_pubkey)
+            //         {
 
-                        sum_xmr += out_info.amount;
+            //             sum_xmr += out_info.amount;
 
-                        string timestamp_str = xmreg::timestamp_to_str(blk.timestamp);
+            //             string timestamp_str = xmreg::timestamp_to_str(blk.timestamp);
 
 
-                        same_tx = (previous_tx_hash == out_info.tx_hash);
+            //             same_tx = (previous_tx_hash == out_info.tx_hash);
 
-                        string out_pub_key_str = REMOVE_HASH_BRAKETS(fmt::format("{:s}",
-                                                                     out_info.out_pub_key));
+            //             string out_pub_key_str = REMOVE_HASH_BRAKETS(fmt::format("{:s}",
+            //                                                          out_info.out_pub_key));
 
-                        string tx_hash_str      = REMOVE_HASH_BRAKETS(fmt::format("{:s}",
-                                                                     out_info.tx_hash));
+            //             string tx_hash_str      = REMOVE_HASH_BRAKETS(fmt::format("{:s}",
+            //                                                          out_info.tx_hash));
 
-                        outputs.push_back(mstch::map {
-                                {"out_pub_key"  , out_pub_key_str},
-                                {"amount"       , fmt::format("{:0.12f}", XMR_AMOUNT(out_info.amount))},
-                                {"output_idx"   , fmt::format("{:04d}", ++out_idx)},
-                                {"tx_hash"      , tx_hash_str},
-                                {"blk_timestamp", timestamp_str},
-                                {"same_tx"      , !same_tx}
-                        });
+            //             outputs.push_back(mstch::map {
+            //                     {"out_pub_key"  , out_pub_key_str},
+            //                     {"amount"       , fmt::format("{:0.12f}", XMR_AMOUNT(out_info.amount))},
+            //                     {"output_idx"   , fmt::format("{:04d}", ++out_idx)},
+            //                     {"tx_hash"      , tx_hash_str},
+            //                     {"blk_timestamp", timestamp_str},
+            //                     {"same_tx"      , !same_tx}
+            //             });
 
-                        previous_tx_hash = out_info.tx_hash;
+            //             previous_tx_hash = out_info.tx_hash;
 
-                    }
-                } // for (const xmreg::output_info out_info : outputs_info)
-            } // for (uint64_t i = tx_blk_height;
+            //         }
+            //     } // for (const xmreg::output_info out_info : outputs_info)
+            // } // for (uint64_t i = tx_blk_height;
 
-            context["outputs_no"] = outputs.size();
-            context["outputs"]    = outputs;
-            context["sum_xmr"]    = fmt::format("{:0.12f}", XMR_AMOUNT(sum_xmr));
+            // context["outputs_no"] = outputs.size();
+            // context["outputs"]    = outputs;
+            // context["sum_xmr"]    = fmt::format("{:0.12f}", XMR_AMOUNT(sum_xmr));
 
             // read my_outputs.html
             string my_outputs_html = xmreg::read(TMPL_MY_OUTPUTS);
