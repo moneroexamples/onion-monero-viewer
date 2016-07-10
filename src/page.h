@@ -204,6 +204,8 @@ namespace xmreg {
 
         bool user_left;
 
+        string timestamp_str;
+
         cryptonote::account_public_address address;
         crypto::secret_key prv_view_key;
 
@@ -279,14 +281,16 @@ namespace xmreg {
             uint64_t tx_blk_height {current_blockchain_height - no_of_blocks_to_search};
             uint64_t sum_xmr {0};
 
-            cout << "prv_view_key: " << prv_view_key << endl;
 
             xmreg::MyLMDB mylmdb {"/home/mwo/.bitmonero/lmdb2"};
 
 
-
             for (uint64_t i = tx_blk_height; i <= current_blockchain_height; ++i)
             {
+
+                if (user_left)
+                    return;
+
                 // get block at the given height i
                 block blk;
 
@@ -303,6 +307,7 @@ namespace xmreg {
 
 
                 this->block_id = i;
+                this->timestamp_str = xmreg::timestamp_to_str(blk.timestamp);
 
                 //cout << "blk: << " << i << " output no.: " << outputs_info.size() << endl;
 
@@ -317,8 +322,6 @@ namespace xmreg {
                     // public transaction key is combined with our viewkey
                     // to create, so called, derived key.
                     crypto::key_derivation derivation;
-
-                    cout << "prv_view_key: " << prv_view_key << endl;
 
                     bool r = generate_key_derivation(out_info.tx_pub_key,
                                                      prv_view_key,
@@ -373,6 +376,11 @@ namespace xmreg {
                     }
                 } // for (const xmreg::output_info out_info : outputs_info)
             } // for (uint64_t i = tx_blk_height;
+        }
+
+        ~search_class_test()
+        {
+            cout << "destroy search_class_test" << endl;
         }
 
     };
@@ -1023,15 +1031,17 @@ namespace xmreg {
         string
         get_search_status(string uuid)
         {
-            uint64_t block_id = searching_threads[uuid]->block_id;
-            string viewkey_str  = searching_threads[uuid]->viewkey_str;
-            cout << uuid << ": " << searching_threads[uuid]->block_id << "viewkey " << viewkey_str << endl;
-            return std::to_string(block_id);
+            uint64_t block_id    = searching_threads[uuid]->block_id;
+            string timestamp_str =  searching_threads[uuid]->timestamp_str;
+            //cout << uuid << ": " << searching_threads[uuid]->block_id << endl;
+            return std::to_string(block_id) + ": " + timestamp_str;
         };
 
         string
         fire_finish_search( string uuid)
         {
+            searching_threads[uuid]->user_left = true;
+            searching_threads.erase(uuid);
             cout <<  "User left" << endl;
             return {};
         };
