@@ -190,6 +190,7 @@ namespace xmreg {
 
     struct search_class_test
     {
+        static xmreg::MyLMDB mylmdb ;
 
         MicroCore* mcore;
         Blockchain* core_storage;
@@ -205,6 +206,10 @@ namespace xmreg {
         bool user_left;
 
         string timestamp_str;
+
+        mstch::array outputs;
+
+
 
         cryptonote::account_public_address address;
         crypto::secret_key prv_view_key;
@@ -226,7 +231,7 @@ namespace xmreg {
                   block_id{0},
                   user_left{false}
         {
-            const set<uint64_t> possible_since_when_values {1, 7, 14, 28};
+            const set<uint64_t> possible_since_when_values {1, 7, 14, 28, 56};
 
             // remove white characters
             boost::trim(xmr_address_str);
@@ -279,10 +284,12 @@ namespace xmreg {
             uint64_t no_of_blocks_to_search = since_when*24*3600 / 120;
 
             uint64_t tx_blk_height {current_blockchain_height - no_of_blocks_to_search};
+
+            uint64_t out_idx = {0};
+
             uint64_t sum_xmr {0};
 
 
-            xmreg::MyLMDB mylmdb {"/home/mwo/.bitmonero/lmdb2"};
 
 
             for (uint64_t i = tx_blk_height; i <= current_blockchain_height; ++i)
@@ -311,7 +318,7 @@ namespace xmreg {
 
                 cout << "blk: << " << i << " output no.: " << outputs_info.size() << endl;
 
-                std::this_thread::sleep_for(std::chrono::seconds(1));
+                //std::this_thread::sleep_for(std::chrono::seconds(1));
 
                 crypto::hash previous_tx_hash {null_hash};
 
@@ -349,6 +356,8 @@ namespace xmreg {
                     if (out_info.out_pub_key == generated_pubkey)
                     {
 
+                        cout << "found output " << endl;
+
                         sum_xmr += out_info.amount;
 
                         string timestamp_str = xmreg::timestamp_to_str(blk.timestamp);
@@ -362,14 +371,14 @@ namespace xmreg {
                         string tx_hash_str      = REMOVE_HASH_BRAKETS(fmt::format("{:s}",
                                                                       out_info.tx_hash));
 
-//                        outputs.push_back(mstch::map {
-//                                {"out_pub_key"  , out_pub_key_str},
-//                                {"amount"       , fmt::format("{:0.12f}", XMR_AMOUNT(out_info.amount))},
-//                                {"output_idx"   , fmt::format("{:04d}", ++out_idx)},
-//                                {"tx_hash"      , tx_hash_str},
-//                                {"blk_timestamp", timestamp_str},
-//                                {"same_tx"      , !same_tx}
-//                        });
+                        outputs.push_back(mstch::map {
+                                {"out_pub_key"  , out_pub_key_str},
+                                {"amount"       , fmt::format("{:0.12f}", XMR_AMOUNT(out_info.amount))},
+                                {"output_idx"   , fmt::format("{:04d}", ++out_idx)},
+                                {"tx_hash"      , tx_hash_str},
+                                {"blk_timestamp", timestamp_str},
+                                {"same_tx"      , !same_tx}
+                        });
 
                         previous_tx_hash = out_info.tx_hash;
 
@@ -382,8 +391,10 @@ namespace xmreg {
         {
             cout << "destroy search_class_test" << endl;
         }
-
     };
+
+    xmreg::MyLMDB search_class_test::mylmdb
+            = xmreg::MyLMDB{"/home/mwo/.bitmonero/lmdb2"};
 
 
     class page {
@@ -1034,7 +1045,14 @@ namespace xmreg {
             uint64_t block_id    = searching_threads[uuid]->block_id;
             string timestamp_str =  searching_threads[uuid]->timestamp_str;
             //cout << uuid << ": " << searching_threads[uuid]->block_id << endl;
-            return std::to_string(block_id) + ": " + timestamp_str;
+
+            stringstream ss;
+
+            ss << block_id << ": " << timestamp_str
+               << " found " <<  searching_threads[uuid]->outputs.size()
+               << " outputs";
+
+            return ss.str();
         };
 
         string
@@ -1054,7 +1072,6 @@ namespace xmreg {
                         uint64_t since_when = 1)
         {
 
-            const set<uint64_t> possible_since_when_values {1, 7, 14, 28};
 
             // remove white characters
             boost::trim(xmr_address_str);
@@ -1069,20 +1086,6 @@ namespace xmreg {
             {
                 return string("Viewkey not provided!");
             }
-
-            // check if since_when is correct value
-            if (!possible_since_when_values.count(since_when))
-            {
-                string err_msg = fmt::format(
-                        "Since when value {:d} is incorrect", since_when);
-                cerr << err_msg << endl;
-                return string(err_msg);
-            }
-
-            // rough estimate of number of recent blocks to search
-            // from the current block. Monero blocks now are, on average,
-            // every 120 seconds, so we use this to get the estimate
-            uint64_t no_of_blocks_to_search = since_when*24*3600 / 120;
 
             // parse string representing given monero address
             cryptonote::account_public_address address;
@@ -1116,9 +1119,6 @@ namespace xmreg {
             };
 
             mstch::array outputs;
-
-            uint64_t tx_blk_height {height - no_of_blocks_to_search};
-            uint64_t sum_xmr {0};
 
             //std::thread t1 {*searching_threads[uuid]};
             std::thread t1 {&search_class_test::search, searching_threads[uuid].get()};
