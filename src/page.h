@@ -315,7 +315,7 @@ namespace xmreg {
                 this->block_id = i;
                 this->timestamp_str = xmreg::timestamp_to_str(blk.timestamp);
 
-                cout << "blk: << " << i << " output no.: " << outputs_info.size() << endl;
+                //cout << "blk: << " << i << " output no.: " << outputs_info.size() << endl;
 
                 //std::this_thread::sleep_for(std::chrono::seconds(1));
 
@@ -1047,9 +1047,16 @@ namespace xmreg {
 
             stringstream ss;
 
-            ss << block_id << ": " << timestamp_str
-               << " found " <<  searching_threads[uuid]->outputs.size()
-               << " outputs";
+            ss << block_id << ": " << timestamp_str;
+
+            for (mstch::node& output: searching_threads[uuid]->outputs)
+            {
+                mstch::map& output_map = boost::get<mstch::map>(output);
+
+                string tx_hash = boost::get<string>(output_map["tx_hash"]);
+
+                ss << "tx_hash: " << tx_hash << "<br/>";
+            }
 
             return ss.str();
         };
