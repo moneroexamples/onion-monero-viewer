@@ -157,7 +157,7 @@ int main(int ac, const char* av[]) {
     });
 
     // run the crow http server
-    app.port(app_port).multithreaded().run();
+    app.port(app_port).run();
 
     return EXIT_SUCCESS;
 }

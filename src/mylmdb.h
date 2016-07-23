@@ -467,6 +467,8 @@ namespace xmreg
                     return false;
                 }
 
+                cr.close();
+
                 rtxn.abort();
 
             }

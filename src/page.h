@@ -290,8 +290,6 @@ namespace xmreg {
             uint64_t sum_xmr {0};
 
 
-
-
             for (uint64_t i = tx_blk_height; i <= current_blockchain_height; ++i)
             {
 
@@ -307,10 +305,11 @@ namespace xmreg {
                     continue;
                 }
 
+                crypto::hash block_id;
+
                 vector<output_info> outputs_info;
 
                 mylmdb.get_output_info(blk.timestamp, outputs_info);
-
 
 
                 this->block_id = i;

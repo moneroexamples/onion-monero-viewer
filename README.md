@@ -29,7 +29,7 @@ Non tor users, can try tor proxy, e.g.,
 ## Still under development
 
 The Onion Monero Viewer is still under development and testing.
-So not everything can work as expected and the explorer can be offline from time
+So not everything can work as expected and the viewer can be offline from time
 to time, when changes are being made to it.
 
 ## Onion Monero Viewer features
@@ -40,13 +40,7 @@ The key features of the Onion Monero Blockchain Explorer are
  - no javascript, no web analytics trackers, no images,
  - open sourced,
  - made fully in C++,
- - the only explorer showing ring signatures,
- - the only explorer showing transaction extra field,
- - the only explorer that can show which outputs belong to the given Monero address and viewkey,
- - the only explorer showing detailed information about mixins, such as, mixins'
- age, timescale, mixin of mixins,
- - the only explorer showing number of amount output indices.
-
+ 
 ## Prerequisite
 
 Everything here was done and tested using Monero 0.9.4 on Ubuntu 16.04 x86_64.
