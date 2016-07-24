@@ -7,6 +7,7 @@
 
 
     <h3>Searching has started (search status updated every 5 seconds)</h3>
+    <h3 id="search_finished" style="display: none">Search finished!</h3>
     <div id="status"></div>
 
 </div>
@@ -31,6 +32,7 @@
                 if (msg["search_finished"])
                 {
                     clearInterval(refreshIntervalId);
+                    $("#search_finished").show();
                 }
             }
         });
