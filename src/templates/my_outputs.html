@@ -5,40 +5,9 @@
     <h5>viewkey: {{viewkey}}</h5>
 
 
+
+    <h3>Searching has started</h3>
     <div id="status"></div>
-
-    <h3>Outputs ({{outputs_no}})</h3>
-    <div class="center">
-        <table class="center" >
-            <tr>
-                <td>no</td>
-                <td>tx hash</td>
-                <td>timestamp</td>
-                <td>output pub keys </td>
-                <td>amount</td>
-            </tr>
-            {{#outputs}}
-            <tr>
-                <td>{{output_idx}}</td>
-                {{#same_tx}}
-                    <td><a href="http://xmrblocksvckbwvx.onion/tx/{{tx_hash}}">{{tx_hash}}</a></td>
-                    <td>{{blk_timestamp}}</td>
-                {{/same_tx}}
-                {{^same_tx}}
-                    <td></td>
-                    <td></td>
-                {{/same_tx}}
-
-                <td>{{out_pub_key}}</td>
-                <td>{{amount}}</td>
-            </tr>
-            {{/outputs}}
-        </table>
-
-        <h3>Sum XMR from matched outputs: {{sum_xmr}}</h3>
-
-    </div>
-
 
 </div>
 

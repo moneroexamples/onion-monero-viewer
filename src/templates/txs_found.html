@@ -1,0 +1,11 @@
+
+
+<H4 style="margin:5px">Searching {{block_id}}/{{blk_chain_height}}: {{current_blk_timestamp}}</H4>
+<div>
+    <table class="center" style="width:90%">
+        {{>tx_output_head}}
+        {{#txs_found}}
+            {{>tx_output_row}}
+        {{/txs_found}}
+    </table>
+</div>

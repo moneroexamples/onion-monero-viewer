@@ -34,6 +34,7 @@
 #define TMPL_FOOTER          TMPL_DIR "/footer.html"
 #define TMPL_BLOCK           TMPL_DIR "/block.html"
 #define TMPL_TX              TMPL_DIR "/tx.html"
+#define TMPL_TXS_FOUND       TMPL_DIR "/txs_found.html"
 #define TMPL_MY_OUTPUTS      TMPL_DIR "/my_outputs.html"
 #define TMPL_SEARCH_RESULTS  TMPL_DIR "/search_results.html"
 
@@ -1041,24 +1042,38 @@ namespace xmreg {
         string
         get_search_status(string uuid)
         {
-            uint64_t block_id    = searching_threads[uuid]->block_id;
-            string timestamp_str =  searching_threads[uuid]->timestamp_str;
-            //cout << uuid << ": " << searching_threads[uuid]->block_id << endl;
+            uint64_t block_id         = searching_threads[uuid]->block_id;
+            string timestamp_str      =  searching_threads[uuid]->timestamp_str;
+            uint64_t blk_chain_height =  searching_threads[uuid]->current_blockchain_height;
 
-            stringstream ss;
+            // read partial for showing details of tx(s) found
 
-            ss << block_id << ": " << timestamp_str;
+
+            mstch::map context {
+                    {"block_id"             , block_id},
+                    {"blk_chain_height"     , blk_chain_height},
+                    {"current_blk_timestamp", timestamp_str},
+                    {"txs_found"            , mstch::array{}}
+            };
 
             for (mstch::node& output: searching_threads[uuid]->outputs)
             {
                 mstch::map& output_map = boost::get<mstch::map>(output);
 
-                string tx_hash = boost::get<string>(output_map["tx_hash"]);
-
-                ss << "tx_hash: " << tx_hash << "<br/>";
+                boost::get<mstch::array>(context["txs_found"]).push_back(output_map);
             }
 
-            return ss.str();
+            // read txs_found.html
+            string tx_found_html = xmreg::read(TMPL_TXS_FOUND);
+
+            map<string, string> partials {
+                    {"tx_output_head", xmreg::read(string(TMPL_PARIALS_DIR)
+                                                   + "/tx_output_header.html")},
+                    {"tx_output_row" , xmreg::read(string(TMPL_PARIALS_DIR)
+                                                   + "/tx_output_row.html")}
+            };
+
+            return mstch::render(tx_found_html, context, partials);
         };
 
         string
