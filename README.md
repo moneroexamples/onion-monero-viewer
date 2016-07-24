@@ -16,11 +16,11 @@ associated transaction. The example not only shows how to use Monero C++ librari
  - [rapidjson](https://github.com/miloyip/rapidjson) - C++ JSON parser/generator
 
 
-## Onion address
+## Temporary Onion address for testing
 
 Tor users:
 
- - [http://dont-know-yet.onion](http://dont-know-yet.onion.onion)
+ - [http://hbyjphgpe6cumkp3.onion](http://hbyjphgpe6cumkp3.onion/)
 
 Non tor users, can try tor proxy, e.g.,
 
