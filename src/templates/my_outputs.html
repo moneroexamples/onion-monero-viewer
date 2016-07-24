@@ -6,23 +6,32 @@
 
 
 
-    <h3>Searching has started</h3>
+    <h3>Searching has started (search status updated every 5 seconds)</h3>
     <div id="status"></div>
 
 </div>
 
 <script>
+
+    var refreshIntervalId;
+
     $(document).ready(function() {
-        setInterval("ajaxd()", 1000);
+        refreshIntervalId = setInterval(ajaxd, 3000);
     });
 
     function ajaxd() {
         $.ajax({
             type: "GET",
             url: "/ajax_test",
+            dataType: 'json',
             data: "uuid={{uuid}}",
             success: function(msg){
-                $("#status").html(msg);
+                //console.log(msg);
+                $("#status").html(msg["data"]);
+                if (msg["search_finished"])
+                {
+                    clearInterval(refreshIntervalId);
+                }
             }
         });
     }

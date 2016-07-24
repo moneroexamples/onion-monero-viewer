@@ -8,9 +8,17 @@
 
 
 #include "mstch/mstch.hpp"
+
+#include "rapidjson/rapidjson.h"
+#include "rapidjson/writer.h"
 #include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
+
+#include "../ext/crow/crow.h"
+
 #include "../ext/format.h"
 #include "../ext/member_checker.h"
+
 
 
 #include "monero_headers.h"
@@ -206,9 +214,13 @@ namespace xmreg {
 
         bool user_left;
 
+        bool search_finished;
+
         string timestamp_str;
 
         mstch::array outputs;
+
+
 
 
 
@@ -230,7 +242,8 @@ namespace xmreg {
                   since_when {_since_when},
                   current_blockchain_height {_height},
                   block_id{0},
-                  user_left{false}
+                  user_left {false},
+                  search_finished {false}
         {
             const set<uint64_t> possible_since_when_values {1, 7, 14, 28, 56};
 
@@ -373,7 +386,7 @@ namespace xmreg {
 
                         outputs.push_back(mstch::map {
                                 {"out_pub_key"  , out_pub_key_str},
-                                {"amount"       , fmt::format("{:0.12f}", XMR_AMOUNT(out_info.amount))},
+                                {"amount"       , out_info.amount},
                                 {"output_idx"   , fmt::format("{:04d}", ++out_idx)},
                                 {"tx_hash"      , tx_hash_str},
                                 {"blk_timestamp", timestamp_str},
@@ -385,7 +398,10 @@ namespace xmreg {
                     }
                 } // for (const xmreg::output_info out_info : outputs_info)
             } // for (uint64_t i = tx_blk_height;
-        }
+
+            search_finished = true;
+
+        } // search()
 
         ~search_class_test()
         {
@@ -1039,29 +1055,42 @@ namespace xmreg {
         }
 
 
-        string
+        crow::json::wvalue
         get_search_status(string uuid)
         {
             uint64_t block_id         = searching_threads[uuid]->block_id;
-            string timestamp_str      =  searching_threads[uuid]->timestamp_str;
-            uint64_t blk_chain_height =  searching_threads[uuid]->current_blockchain_height;
-
-            // read partial for showing details of tx(s) found
-
+            string timestamp_str      = searching_threads[uuid]->timestamp_str;
+            uint64_t blk_chain_height = searching_threads[uuid]->current_blockchain_height;
+            uint64_t no_outputs_found = searching_threads[uuid]->outputs.size();
 
             mstch::map context {
                     {"block_id"             , block_id},
                     {"blk_chain_height"     , blk_chain_height},
                     {"current_blk_timestamp", timestamp_str},
-                    {"txs_found"            , mstch::array{}}
+                    {"txs_found"            , mstch::array{}},
+                    {"no_outputs_found"     , no_outputs_found}
             };
 
+            uint64_t sum_xmr {0};
+
+            // for each output found
             for (mstch::node& output: searching_threads[uuid]->outputs)
             {
                 mstch::map& output_map = boost::get<mstch::map>(output);
 
-                boost::get<mstch::array>(context["txs_found"]).push_back(output_map);
+                uint64_t amount = boost::get<uint64_t>(output_map["amount"]);
+
+                output_map["amount_str"] = fmt::format("{:0.12f}", XMR_AMOUNT(amount));
+
+                boost::get<mstch::array>(
+                        context["txs_found"]).push_back(output_map);
+
+                sum_xmr += amount;
             }
+
+            context.insert(
+                    {"sum_xmr", fmt::format("{:0.12f}", XMR_AMOUNT(sum_xmr))}
+            );
 
             // read txs_found.html
             string tx_found_html = xmreg::read(TMPL_TXS_FOUND);
@@ -1073,11 +1102,39 @@ namespace xmreg {
                                                    + "/tx_output_row.html")}
             };
 
-            return mstch::render(tx_found_html, context, partials);
+//            rapidjson::Document json;
+//            json.SetObject();
+//
+//            rapidjson::Value status("success");
+//            json.AddMember("status", status, json.GetAllocator());
+//
+//
+//            rapidjson::Value data;
+//            data.SetString(mstch::render(tx_found_html, context, partials));
+//
+//            // Serialize the JSON object
+//            std::string account_data;
+//            rapidjson::StringBuffer buffer;
+//            rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+//            json.Accept(writer);
+//            account_data = buffer.GetString();
+
+            crow::json::wvalue json_response;
+
+            json_response["status"] = "success";
+            json_response["data"]   = mstch::render(tx_found_html, context, partials);
+            json_response["search_finished"] = searching_threads[uuid]->search_finished;
+
+
+            //cout << "json: " << json_response << endl;
+
+            return json_response;
+
+            //return mstch::render(tx_found_html, context, partials);
         };
 
         string
-        fire_finish_search( string uuid)
+        fire_finish_search(string uuid)
         {
             searching_threads[uuid]->user_left = true;
             searching_threads.erase(uuid);
