@@ -23,7 +23,7 @@ namespace xmreg
         desc.add_options()
                 ("help,h", value<bool>()->default_value(false)->implicit_value(true),
                  "produce help message")
-                ("port,p", value<string>()->default_value("8081"),
+                ("port,p", value<string>()->default_value("8082"),
                  "default port")
                 ("bc-path,b", value<string>(),
                  "path to lmdb blockchain")
