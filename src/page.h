@@ -246,7 +246,7 @@ namespace xmreg {
                   user_left {false},
                   search_finished {false}
         {
-            const set<uint64_t> possible_since_when_values {1, 7, 14, 28, 56};
+            const set<uint64_t> possible_since_when_values {1, 7, 14, 28};
 
             // remove white characters
             boost::trim(xmr_address_str);
