@@ -2,7 +2,7 @@
 <div>
     <h3>Checking which outputs belong to the given address and viewkey</h3>
     <h5>address: {{xmr_address}}</h5>
-    <h5>viewkey: {{viewkey}}</h5>
+    <h5>viewkey: {{xmr_viewkey}}</h5>
 
     <h3>Searching has started (search status updated every 3 seconds)</h3>
 
@@ -12,38 +12,3 @@
 
 </div>
 
-<script>
-
-    var refreshIntervalId;
-
-    $(document).ready(function() {
-        refreshIntervalId = setInterval(ajaxd, 3000);
-    });
-
-    function ajaxd() {
-        $.ajax({
-            type: "GET",
-            url: "/ajax_test",
-            dataType: 'json',
-            data: "uuid={{uuid}}",
-            success: function(msg){
-                //console.log(msg);
-                $("#status").html(msg["data"]);
-                if (msg["search_finished"])
-                {
-                    clearInterval(refreshIntervalId);
-                    $("#search_finished").show();
-                }
-            }
-        });
-    }
-
-    $(window).on("beforeunload", function() {
-        $.ajax({
-            type: "GET",
-            data: "uuid={{uuid}}",
-            url: "/finish_search"
-        });
-    })
-
-</script>

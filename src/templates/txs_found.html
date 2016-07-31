@@ -1,4 +1,9 @@
 
+<h3>Checking which outputs belong to the given address and viewkey</h3>
+<h5>address: {{xmr_address}}</h5>
+<h5>viewkey: {{viewkey}}</h5>
+
+<h3>Searching has started (search status updated every 2 seconds)</h3>
 
 <H4 style="margin:5px">
     Search status: {{block_id}}/{{blk_chain_height}} | {{current_blk_timestamp}}
@@ -7,6 +12,11 @@
 <H4 style="margin:5px">
    Outputs found: {{no_outputs_found}} for total of {{sum_xmr}} xmr
 </H4>
+
+{{#search_finished}}
+    <h3 id="searchfinished">Search finished!</h3>
+{{/search_finished}}
+
 <div>
     <table class="center" style="width:90%">
         {{>tx_output_head}}

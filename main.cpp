@@ -124,6 +124,14 @@ int main(int ac, const char* av[]) {
         return xmrblocks.get_search_status(uuid);
     });
 
+
+    CROW_ROUTE(app, "/searchstatus").methods("GET"_method)
+    ([&](const crow::request& req) {
+        string uuid  = string(req.url_params.get("uuid"));
+        return xmrblocks.get_search_status(uuid);
+    });
+
+
 //    CROW_ROUTE(app, "/tx/<string>")
 //    ([&](string tx_hash, string xmr_address, string viewkey) {
 //        return xmrblocks.show_tx(tx_hash);

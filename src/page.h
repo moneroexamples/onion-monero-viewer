@@ -46,6 +46,7 @@
 #define TMPL_MY_OUTPUTS      TMPL_DIR "/my_outputs.html"
 #define TMPL_MY_TX_OUTPUTS   TMPL_DIR "/my_tx_outputs.html"
 #define TMPL_SEARCH_RESULTS  TMPL_DIR "/search_results.html"
+#define TMPL_REDIRECT        TMPL_DIR "/redirect_to_status.html"
 
 namespace xmreg {
 
@@ -1061,7 +1062,7 @@ namespace xmreg {
         }
 
 
-        crow::json::wvalue
+        string
         get_search_status(string uuid)
         {
 
@@ -1073,12 +1074,7 @@ namespace xmreg {
             // if not such thread
             if (it == searching_threads.end())
             {
-                crow::json::wvalue json_response;
-
-                json_response["status"] = "error";
-                json_response["data"]   = "Search thread not found!!!";
-
-                return json_response;
+                return "No search thread found for this uuid: " + uuid;
             }
 
 
@@ -1088,6 +1084,7 @@ namespace xmreg {
             uint64_t no_outputs_found = searching_threads[uuid]->outputs.size();
             string xmr_address_str    = searching_threads[uuid]->xmr_address_str;
             string xmr_viewkey_str    = searching_threads[uuid]->viewkey_str;
+            bool search_finished      = searching_threads[uuid]->search_finished;
 
             mstch::map context {
                     {"block_id"             , block_id},
@@ -1097,6 +1094,8 @@ namespace xmreg {
                     {"no_outputs_found"     , no_outputs_found},
                     {"xmr_address"          , xmr_address_str},
                     {"xmr_viewkey"          , xmr_viewkey_str},
+                    {"refresh"              , true},
+                    {"search_finished"      , search_finished}
             };
 
             uint64_t sum_xmr {0};
@@ -1130,20 +1129,12 @@ namespace xmreg {
                                                    + "/tx_output_row.html")}
             };
 
-            crow::json::wvalue json_response;
+            // add header and footer
+            string full_page = get_full_page(tx_found_html);
 
-            json_response["status"] = "success";
-            json_response["data"]   = mstch::render(tx_found_html,
-                                                    context, partials);
+            // render the page
+            return mstch::render(full_page, context, partials);
 
-            json_response["search_finished"] =
-                    searching_threads[uuid]->search_finished;
-
-            //cout << "json: " << json_response << endl;
-
-            return json_response;
-
-            //return mstch::render(tx_found_html, context, partials);
         };
 
         string
@@ -1215,14 +1206,11 @@ namespace xmreg {
             std::thread t1 {&search_class_test::search, searching_threads[uuid].get()};
             t1.detach();
 
-            // read my_outputs.html
-            string my_outputs_html = xmreg::read(TMPL_MY_OUTPUTS);
-
-            // add header and footer
-            string full_page = get_full_page(my_outputs_html);
+            // read redirect_to_status.html
+            string redirect_html = xmreg::read(TMPL_REDIRECT);
 
             // render the page
-            return mstch::render(full_page, context);
+            return mstch::render(redirect_html, context);
         }
 
         string
