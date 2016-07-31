@@ -37,7 +37,7 @@ to time, when changes are being made to it.
 The key features of the Onion Monero Blockchain Explorer are
 
  - available as a hidden service,
- - no javascript, no web analytics trackers, no images,
+ - no web analytics trackers, no images, co cookies
  - open sourced,
  - made fully in C++,
  
@@ -128,6 +128,13 @@ Example output:
 
 Go to your browser: http://127.0.0.1:8081
 
+## Testing address and viewkey
+
+For testing of the viewer, one can use [official address and viewkey](https://github.com/monero-project/bitmonero#supporting-the-project)
+of the Monero, i.e., 
+
+- Address: 44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A
+- Viewkey: f359631075708155cc3d92a32b75a7d02a5dcf27756707b47a2b31b21c389501
 
 ## Other examples
 
