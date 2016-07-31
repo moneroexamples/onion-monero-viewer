@@ -1,9 +1,26 @@
 <tr>
-	<td>{{blk_timestamp}}</td>
-	<td><a href="/tx/{{tx_hash}}/{{xmr_address}}/{{xmr_viewkey}}">
-		{{tx_hash}}
-	</a>
-	</td>
-	<td>{{out_pub_key}}</td>
-	<td>{{amount_str}}</td>
+	{{#same_tx}}
+		<td style="vertical-align: top">{{blk_timestamp}}</td>
+		<td style="text-align: left">
+			<a href="/tx/{{tx_hash}}/{{xmr_address}}/{{xmr_viewkey}}">
+			{{tx_hash}}</a>
+			<table style="padding-left: 2px">
+				<tr>
+					<td >↳ opk: {{out_pub_key}}</td><td>{{amount_str}} xmr</td>
+				</tr>
+			</table>
+		</td>
+	{{/same_tx}}
+	{{^same_tx}}
+		<td></td>
+		<td>
+			<table style="padding-left: 2px">
+				<tr>
+					<td> ↳ opk: {{out_pub_key}}</td><td>{{amount_str}} xmr</td>
+				</tr>
+			</table>
+		</td>
+	{{/same_tx}}
+	<!--<td>{{out_pub_key}}</td>-->
+	<!--<td>{{amount_str}}</td>-->
 </tr>

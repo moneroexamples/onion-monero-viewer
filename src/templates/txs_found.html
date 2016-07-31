@@ -1,7 +1,7 @@
 
 <h3>Checking which outputs belong to the given address and viewkey</h3>
 <h5>address: {{xmr_address}}</h5>
-<h5>viewkey: {{viewkey}}</h5>
+<h5>viewkey: {{xmr_viewkey}}</h5>
 
 <h3>Searching has started (search status updated every 2 seconds)</h3>
 
@@ -18,7 +18,7 @@
 {{/search_finished}}
 
 <div>
-    <table class="center" style="width:90%">
+    <table class="center" style="width:70%">
         {{>tx_output_head}}
         {{#txs_found}}
             {{>tx_output_row}}

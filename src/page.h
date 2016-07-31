@@ -1094,11 +1094,20 @@ namespace xmreg {
                     {"no_outputs_found"     , no_outputs_found},
                     {"xmr_address"          , xmr_address_str},
                     {"xmr_viewkey"          , xmr_viewkey_str},
-                    {"refresh"              , true},
+                    {"refresh"              , !search_finished},
                     {"search_finished"      , search_finished}
             };
 
             uint64_t sum_xmr {0};
+
+            string tx_hash {""};
+
+            // initialize tx_hash with first tx found
+            if (!searching_threads[uuid]->outputs.empty())
+            {
+                mstch::map& output_map = boost::get<mstch::map>(searching_threads[uuid]->outputs[0]);
+                //tx_hash = boost::get<string>(output_map["tx_hash"]);
+            }
 
             // for each output found
             for (mstch::node& output: searching_threads[uuid]->outputs)
@@ -1106,8 +1115,14 @@ namespace xmreg {
                 mstch::map& output_map = boost::get<mstch::map>(output);
 
                 uint64_t amount = boost::get<uint64_t>(output_map["amount"]);
+                string current_tx_hash = boost::get<string>(output_map["tx_hash"]);
 
                 output_map["amount_str"] = fmt::format("{:0.12f}", XMR_AMOUNT(amount));
+
+                output_map["same_tx"]    = (tx_hash != current_tx_hash);
+
+                if (tx_hash != current_tx_hash)
+                    tx_hash = current_tx_hash;
 
                 boost::get<mstch::array>(
                         context["txs_found"]).push_back(output_map);
