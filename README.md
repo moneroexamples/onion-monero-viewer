@@ -34,7 +34,7 @@ to time, when changes are being made to it.
 
 ## Onion Monero Viewer features
 
-The key features of the Onion Monero Blockchain Explorer are
+The key features of the Onion Monero Viewer are:
 
  - available as a hidden service,
  - no web analytics trackers, no images, co cookies
