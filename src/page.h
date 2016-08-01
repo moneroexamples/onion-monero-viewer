@@ -1095,7 +1095,8 @@ namespace xmreg {
                     {"xmr_address"          , xmr_address_str},
                     {"xmr_viewkey"          , xmr_viewkey_str},
                     {"refresh"              , !search_finished},
-                    {"search_finished"      , search_finished}
+                    {"search_finished"      , search_finished},
+                    {"uuid"                 , uuid}
             };
 
             uint64_t sum_xmr {0};
@@ -1210,7 +1211,8 @@ namespace xmreg {
             mstch::map context {
                 {"xmr_address"  , xmr_address_str},
                 {"viewkey"      , viewkey_str},
-                {"uuid"         , uuid}
+                {"uuid"         , uuid},
+                {"refresh"      , true}
             };
 
             mstch::array outputs;
@@ -1223,7 +1225,8 @@ namespace xmreg {
             string redirect_html = xmreg::read(TMPL_REDIRECT);
 
             // render the page
-            return mstch::render(redirect_html, context);
+            //return mstch::render(redirect_html, context);
+            return get_search_status(uuid);
         }
 
         string
