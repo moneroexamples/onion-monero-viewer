@@ -40,7 +40,7 @@ The key features of the Onion Monero Viewer are:
  - no web analytics trackers, no images, co cookies
  - open sourced,
  - made fully in C++,
- 
+
 ## Prerequisite
 
 Everything here was done and tested using Monero 0.9.4 on Ubuntu 16.04 x86_64.
@@ -60,6 +60,7 @@ as shown here:
 
 ![Onion Monero Viewer](https://raw.githubusercontent.com/moneroexamples/onion-monero-viewer/master/screenshot/screenshot2.jpg)
 
+![Onion Monero Viewer](https://raw.githubusercontent.com/moneroexamples/onion-monero-viewer/master/screenshot/screenshot3.jpg)
 
 ## Compile and run the viewer
 
@@ -80,7 +81,7 @@ The Onion Explorer uses Monero C++ libraries and headers. Also some functionalit
 Most unique search abilities of the Onion Viewer are achieved through using
 a [custom lmdb database](https://github.com/moneroexamples/lmdbcpp-monero.git) constructed based on the Monero blockchain.
 The reason for the custom database is that Monero's own lmdb database has limited
-search abilities. 
+search abilities.
 
 Instruction how to compile the `lmdbcpp-monero` are provided here:
 
@@ -131,7 +132,7 @@ Go to your browser: http://127.0.0.1:8081
 ## Testing address and viewkey
 
 For testing of the viewer, one can use [official address and viewkey](https://github.com/monero-project/bitmonero#supporting-the-project)
-of the Monero, i.e., 
+of the Monero, i.e.,
 
 - Address: 44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A
 - Viewkey: f359631075708155cc3d92a32b75a7d02a5dcf27756707b47a2b31b21c389501
