@@ -1168,8 +1168,6 @@ namespace xmreg {
                         string uuid,
                         uint64_t since_when = 1)
         {
-
-
             // remove white characters
             boost::trim(xmr_address_str);
             boost::trim(viewkey_str);

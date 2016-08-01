@@ -127,6 +127,9 @@ int main(int ac, const char* av[]) {
 
     CROW_ROUTE(app, "/searchstatus").methods("GET"_method)
     ([&](const crow::request& req) {
+        //string xmr_address  = string(req.url_params.get("xmr_address"));
+
+        cout << "raw_url: " << req.raw_url << endl;
         string uuid  = string(req.url_params.get("uuid"));
         return xmrblocks.get_search_status(uuid);
     });
@@ -154,6 +157,16 @@ int main(int ac, const char* av[]) {
 
     CROW_ROUTE(app, "/myoutputs").methods("GET"_method)
     ([&](const crow::request& req) {
+
+
+        // if uuid found in the url, it means that we have already
+        // created a search thread, and now we just want to disply
+        // the search status
+        if (req.raw_url.find("uuid") != string::npos)
+        {
+            string uuid  = string(req.url_params.get("uuid"));
+            return xmrblocks.get_search_status(uuid);
+        }
 
         string xmr_address  = string(req.url_params.get("xmr_address"));
         string viewkey      = string(req.url_params.get("viewkey"));
