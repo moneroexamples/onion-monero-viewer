@@ -58,8 +58,10 @@ as shown here:
 
 ## Example screenshot
 
+### Front page
 ![Onion Monero Viewer](https://raw.githubusercontent.com/moneroexamples/onion-monero-viewer/master/screenshot/screenshot2.jpg)
 
+### Results page
 ![Onion Monero Viewer](https://raw.githubusercontent.com/moneroexamples/onion-monero-viewer/master/screenshot/screenshot3.jpg)
 
 ## Compile and run the viewer
