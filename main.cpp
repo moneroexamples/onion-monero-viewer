@@ -1,12 +1,10 @@
 
+#include "ext/crow/crow.h"
+
 #include "src/CmdLineOptions.h"
 #include "src/MicroCore.h"
 #include "src/page.h"
 
-#include "ext/crow/crow.h"
-#include "ext/member_checker.h"
-
-#include <fstream>
 
 #include <boost/uuid/uuid.hpp>            // uuid class
 #include <boost/uuid/uuid_generators.hpp> // generators
