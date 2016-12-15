@@ -1727,11 +1727,10 @@ namespace xmreg {
                 cerr << "Error opening/accessing custom lmdb database: "
                      << e.what() << endl;
             }
-            catch (...)
+            catch (std::exception& e)
             {
-                std::exception_ptr p = std::current_exception();
                 cerr << "Error opening/accessing custom lmdb database: "
-                     << p.__cxa_exception_type()->name() << endl;
+                     << e.what() << endl;
             }
 
 
