@@ -335,7 +335,7 @@ namespace xmreg {
 
                 //std::this_thread::sleep_for(std::chrono::seconds(1));
 
-                crypto::hash previous_tx_hash {null_hash};
+                crypto::hash previous_tx_hash = null_hash;
 
                 // go through all outputs in each block, based on timestamp,
                 // and search for our outputs
