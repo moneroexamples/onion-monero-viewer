@@ -146,6 +146,12 @@ Monero [forum donation](https://www.reddit.com/r/Monero/comments/5j2rm7/in_last_
 - Address: 45ttEikQEZWN1m7VxaVN9rjQkpSdmpGZ82GwUps66neQ1PqbQMno4wMY8F5jiDt2GoHzCtMwa7PDPJUJYb1GYrMP4CwAwNp
 - Viewkey: c9347bc1e101eab46d3a6532c5b6066e925f499b47d285d5720e6a6f4cc4350c
 
+[Old Monero donation](https://github.com/monero-project/monero/pull/714/files) address:
+
+- Address: 46BeWrHpwXmHDpDEUmZBWZfoQpdc6HaERCNmx1pEYL2rAcuwufPN9rXHHtyUA4QVy66qeFQkn6sfK8aHYjA3jk3o1Bv16em 
+- Viewkey: e422831985c9205238ef84daf6805526c14d96fd7b059fe68c7ab98e495e5703
+
+
 ## Other examples
 
 Other examples can be found on  [github](https://github.com/moneroexamples?tab=repositories).
